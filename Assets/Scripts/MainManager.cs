@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -17,6 +18,8 @@ public class MainManager : MonoBehaviour
     private int m_Points;
     
     private bool m_GameOver = false;
+    [SerializeField] Text bestScore;
+    private string playerName;
 
     
     // Start is called before the first frame update
@@ -24,6 +27,7 @@ public class MainManager : MonoBehaviour
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
+        m_Points = 0;
         
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
@@ -35,6 +39,13 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+
+        if(MenuManager.Instance)
+        {
+            playerName = MenuManager.Instance.playerName;
+            ScoreText.text = $"Score : {playerName} : {m_Points}";
+            bestScore.text = $"Best Score : {MenuManager.Instance.bestPlayer.playerName} : {MenuManager.Instance.bestPlayer.score}";
         }
     }
 
@@ -65,12 +76,17 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {playerName} : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if(m_Points >= MenuManager.Instance.bestPlayer.score)
+        {
+            MenuManager.Instance.SaveBestPlayer(playerName,m_Points);
+            bestScore.text = $"Best Score : {MenuManager.Instance.bestPlayer.playerName} : {MenuManager.Instance.bestPlayer.score}";
+        }
     }
 }
